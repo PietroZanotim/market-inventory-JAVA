@@ -1,10 +1,14 @@
 package Program;
 
 import db.DB;
+import model.dao.CategoryDao;
+import model.dao.DaoFactory;
+import model.dao.ProductDao;
+import model.dao.impl.CategoryDaoJDBC;
+import model.dao.impl.ProductDaoJDBC;
 import model.exceptions.InputException;
 
 import java.sql.Connection;
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
@@ -14,7 +18,11 @@ public class Main {
         Scanner sc = new Scanner(System.in);
 
         System.out.println("Tentando conectar...");
+
         Connection conn = DB.getConnection();
+        CategoryDao catDao = DaoFactory.categoryConnection();
+        ProductDao prodDao = DaoFactory.productConnection();
+
         System.out.println("Sucesso!");
         System.out.println();
 

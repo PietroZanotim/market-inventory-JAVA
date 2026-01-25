@@ -4,9 +4,17 @@ import model.dao.CategoryDao;
 import model.entities.Category;
 import model.entities.Product;
 
+import java.sql.Connection;
 import java.util.List;
 
 public class CategoryDaoJDBC implements CategoryDao {
+
+    private Connection conn;
+
+    public CategoryDaoJDBC(Connection conn) {
+        this.conn = conn;
+    }
+
     @Override
     public List<Category> findALL() {
         return List.of();
