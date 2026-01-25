@@ -1,4 +1,34 @@
 package model.dao.impl;
 
-public class CategoryDaoJDBC {
+import model.dao.CategoryDao;
+import model.entities.Category;
+import model.entities.Product;
+
+import java.util.List;
+
+public class CategoryDaoJDBC implements CategoryDao {
+    @Override
+    public List<Category> findALL() {
+        return List.of();
+    }
+
+    @Override
+    public void insertCategory(Category obj) {
+
+    }
+
+    @Override
+    public void updateCategory(Category obj) {
+
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+
+    }
+
+    @Override
+    public Product findById(Integer id) {
+        return null;
+    }
 }
