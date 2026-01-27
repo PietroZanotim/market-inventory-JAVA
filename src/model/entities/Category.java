@@ -42,4 +42,9 @@ public class Category {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%d | Name: %s", getId(), getName());
+    }
 }

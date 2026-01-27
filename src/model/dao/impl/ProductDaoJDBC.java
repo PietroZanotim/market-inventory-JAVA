@@ -31,16 +31,16 @@ public class ProductDaoJDBC implements ProductDao {
 
         try {
 
-            ps = conn.prepareStatement("SELECT product.*, category.Name as CatName"
-                                        + "FROM product"
-                                        + "INNER JOIN category"
+            ps = conn.prepareStatement("SELECT product.*, category.Name as CatName "
+                                        + "FROM product "
+                                        + "INNER JOIN category "
                                         + "ON product.CategoryId = category.Id");
 
             rs = ps.executeQuery();
 
             while(rs.next()) {
 
-                Category cat = new Category(rs.getInt("DepartmentId"), rs.getString("CatName"));
+                Category cat = new Category(rs.getInt("CategoryId"), rs.getString("CatName"));
                 list.add(instantiateProduct(rs, cat));
 
             }

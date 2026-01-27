@@ -72,4 +72,11 @@ public class Product {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+    @Override
+    public String toString() {
+        return String.format("Id: %d | %s | R$ %.2f | Units: %d | Category: %s",
+                getId(), getName(), getPrice(), getQuantity(), getCategory().getName());
+
+    }
 }
