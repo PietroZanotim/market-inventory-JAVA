@@ -60,21 +60,143 @@ public class ProductDaoJDBC implements ProductDao {
     @Override
     public void insertProduct(Product obj) {
 
+        PreparedStatement ps = null;
+
+        try {
+
+            ps = conn.prepareStatement("INSERT INTO product "
+                                        + "(Name, Price, Quantity, CategoryId "
+                                        + "VALUES (?, ?, ?, ?)", ps.RETURN_GENERATED_KEYS
+            );
+
+            ps.setString(1, obj.getName());
+            ps.setDouble(2, obj.getPrice());
+            ps.setInt(3, obj.getQuantity());
+            ps.setInt(4, obj.getCategory().getId());
+
+            ResultSet rs = ps.getGeneratedKeys();
+
+            if(rs.next()) {
+                obj.setId(rs.getInt(1));
+                DB.closeResultSet(rs);
+            }
+            else {
+                throw new DbException("Error!");
+            }
+
+        }
+        catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(ps);
+        }
     }
 
     @Override
-    public void updateProdutc(Product obj) {
+    public void updateProduct(Product obj) {
+
+        PreparedStatement ps = null;
+
+        try {
+
+            ps = conn.prepareStatement("UPDATE product "
+                                        + "SET Name = ?, Price = ?, Quantity = ?, CategoryId = ?"
+                                        + "WHERE Id = ?"
+            );
+
+            ps.setString(1, obj.getName());
+            ps.setDouble(2, obj.getPrice());
+            ps.setInt(3, obj.getQuantity());
+            ps.setInt(4, obj.getCategory().getId());
+            ps.setInt(5, obj.getId());
+
+            int rows = ps.executeUpdate();
+
+            if(rows>0) {
+                System.out.print("Sucess!");
+            }
+            else {
+                throw new DbException("Error!");
+            }
+
+        }
+        catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(ps);
+        }
 
     }
 
     @Override
     public void deleteById(Integer id) {
 
+        PreparedStatement ps = null;
+
+        try {
+
+            ps = conn.prepareStatement("DELETE FROM product "
+                                        + "WHERE Id = ?"
+            );
+
+            ps.setInt(1, id);
+
+            int rows = ps.executeUpdate();
+
+            if(rows>0) {
+                System.out.println("Sucess!");
+            }
+            else {
+                throw new DbException("Error! Id not found.");
+            }
+
+        }
+        catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(ps);
+        }
     }
 
     @Override
     public Product findById(Integer id) {
-        return null;
+
+        PreparedStatement ps = null;
+
+        try {
+
+            ps = conn.prepareStatement("SELECT * FROM product, category.Name as CatName "
+                                        + "INNER JOIN category "
+                                        + "ON category.Id = CategoryId "
+                                        + "WHERE Id = ?"
+            );
+
+            ps.setInt(1, id);
+
+            ResultSet rs = ps.executeQuery();
+
+            if(rs.next()) {
+                Category category = new Category(rs.getInt("CategoryId"), rs.getString("CatName"));
+                Product findProduct = instantiateProduct(rs, category);
+                DB.closeResultSet(rs);
+
+                return findProduct;
+            }
+            else {
+                throw new DbException("Error!");
+            }
+
+        }
+        catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(ps);
+        }
+
     }
 
     private Product instantiateProduct(ResultSet rs, Category category) throws SQLException {
