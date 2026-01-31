@@ -4,8 +4,6 @@ import db.DB;
 import model.dao.CategoryDao;
 import model.dao.DaoFactory;
 import model.dao.ProductDao;
-import model.dao.impl.CategoryDaoJDBC;
-import model.dao.impl.ProductDaoJDBC;
 import model.entities.Product;
 import model.exceptions.InputException;
 
@@ -13,6 +11,8 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import static Program.UI.*;
 
 public class Main {
 
@@ -63,6 +63,7 @@ public class Main {
 
                     case 4:
                         running = false;
+                        System.out.println("Closing...");
                     break;
                 }
             }
@@ -75,28 +76,6 @@ public class Main {
         }
 
         DB.closeConnection();
-    }
-
-    static Integer validateOption(int option) {
-
-        if(option<1 || option >4) {
-            throw new InputException("Invalid option!\n");
-        }
-        else {
-            return option;
-        }
-    }
-
-    static void clearScreen(){
-        for(int i = 0; i < 50; i++){
-            System.out.println();
-        }
-    }
-
-    public static void waitEnter(Scanner sc) {
-        System.out.println("\n_________________________________");
-        System.out.println("Press ENTER to continue...");
-        sc.nextLine(); // Aqui ele trava e fica esperando
     }
 
     public static void registerProduct(Scanner sc) {
