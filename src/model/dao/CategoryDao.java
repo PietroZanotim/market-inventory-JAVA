@@ -11,5 +11,6 @@ public interface CategoryDao {
     public void updateCategory(Category obj);
     public void deleteById(Integer id);
     public Category findById(Integer id);
+    public Category findByName(String name);
 
 }

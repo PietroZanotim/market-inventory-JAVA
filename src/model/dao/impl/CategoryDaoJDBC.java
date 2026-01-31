@@ -185,6 +185,35 @@ public class CategoryDaoJDBC implements CategoryDao {
         }
     }
 
+    public Category findByName(String name) {
+
+        PreparedStatement ps = null;
+
+        try {
+
+            ps = conn.prepareStatement("SELECT * FROM category "
+                    + "WHERE Name = ?"
+            );
+
+            ps.setString(1, name);
+
+            ResultSet rs = ps.executeQuery();
+
+            if(rs.next()) {
+                return new Category(rs.getInt(1), rs.getString("Name"));
+            }
+            else {
+                throw new DbException("Category non-existent.");
+            }
+        }
+        catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(ps);
+        }
+    }
+
     private Category instantiateCategory(ResultSet rs) throws SQLException {
 
         return new Category(rs.getInt(01), rs.getString("Name"));

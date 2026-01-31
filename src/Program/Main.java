@@ -4,7 +4,9 @@ import db.DB;
 import model.dao.CategoryDao;
 import model.dao.DaoFactory;
 import model.dao.ProductDao;
+import model.entities.Category;
 import model.entities.Product;
+import model.exceptions.DbException;
 import model.exceptions.InputException;
 
 import java.sql.Connection;
@@ -46,6 +48,7 @@ public class Main {
 
                 switch (option) {
                     case 1:
+                        clearScreen();
                         List<Product> list = new ArrayList<>();
                         list = prodDao.findALL();
                         for(Product p : list) {
@@ -55,7 +58,8 @@ public class Main {
                     break;
 
                     case 2:
-                        registerProduct(sc);
+                        Product newProduct = registerProduct(sc, catDao, prodDao);
+                        prodDao.insertProduct(newProduct);
                     break;
 
                     case 3:
@@ -68,27 +72,64 @@ public class Main {
                 }
             }
             catch (InputException e) {
-                System.out.println("Input invalid! Choose an valid option.");
+                clearScreen();
+                System.out.println("Input invalid! Enter an valid data.");
+                waitEnter(sc);
+            }
+            catch (DbException e) {
+                clearScreen();
+                System.out.println(e.getMessage());
+                waitEnter(sc);
             }
             catch (RuntimeException e) {
                 throw new RuntimeException(e);
             }
         }
 
+        sc.close();
         DB.closeConnection();
     }
 
-    public static void registerProduct(Scanner sc) {
+    public static Product registerProduct(Scanner sc, CategoryDao catDao, ProductDao prodDao) {
 
         clearScreen();
-        System.out.println("Enter the product name: ");
-        String name = sc.nextLine();
-        System.out.println("Enter the product price: ");
-        Double price = sc.nextDouble();
-        System.out.println("Enter the product quantity: ");
-        Integer quantity = sc.nextInt();
-        System.out.println("Enter the product category name: ");
-        String category = sc.nextLine();
 
+        try {
+            System.out.println("Enter the product name: ");
+            String name = sc.nextLine();
+            System.out.println("Enter the product price: ");
+            Double price = sc.nextDouble();
+            System.out.println("Enter the product quantity: ");
+            Integer quantity = sc.nextInt();
+            sc.nextLine();
+
+            String categoryName;
+            Category newCategory = null;
+
+            while(true) {
+                System.out.println("Enter the product category name: ");
+                categoryName = sc.nextLine();
+
+                newCategory = catDao.findByName(categoryName);
+
+                if(newCategory!=null) {
+                    break;
+                }
+                else {
+                    System.out.println("Category non-existent. Enter again.");
+                    System.out.println();
+                }
+            }
+
+            Product newProduct = new Product(1, name, price, quantity, newCategory);
+
+            return newProduct;
+        }
+        catch (InputException e) {
+            throw new InputException(e.getMessage());
+        }
+        catch (DbException e) {
+            throw new DbException(e.getMessage());
+        }
     }
 }
