@@ -65,8 +65,8 @@ public class ProductDaoJDBC implements ProductDao {
         try {
 
             ps = conn.prepareStatement("INSERT INTO product "
-                                        + "(Name, Price, Quantity, CategoryId "
-                                        + "VALUES (?, ?, ?, ?)", ps.RETURN_GENERATED_KEYS
+                                        + "(Name, Price, Quantity, CategoryId) "
+                                        + "VALUES (?, ?, ?, ?)", java.sql.Statement.RETURN_GENERATED_KEYS
             );
 
             ps.setString(1, obj.getName());
@@ -74,16 +74,19 @@ public class ProductDaoJDBC implements ProductDao {
             ps.setInt(3, obj.getQuantity());
             ps.setInt(4, obj.getCategory().getId());
 
-            ResultSet rs = ps.getGeneratedKeys();
+            int rows = ps.executeUpdate();
 
-            if(rs.next()) {
-                obj.setId(rs.getInt(1));
+            if(rows>0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if(rs.next()) {
+                    obj.setId(rs.getInt(1));
+                    System.out.println("Sucess!");
+                }
                 DB.closeResultSet(rs);
             }
             else {
                 throw new DbException("Error!");
             }
-
         }
         catch (SQLException e) {
             throw new DbException(e.getMessage());
@@ -101,7 +104,7 @@ public class ProductDaoJDBC implements ProductDao {
         try {
 
             ps = conn.prepareStatement("UPDATE product "
-                                        + "SET Name = ?, Price = ?, Quantity = ?, CategoryId = ?"
+                                        + "SET Name = ?, Price = ?, Quantity = ?, CategoryId = ? "
                                         + "WHERE Id = ?"
             );
 
@@ -168,10 +171,11 @@ public class ProductDaoJDBC implements ProductDao {
 
         try {
 
-            ps = conn.prepareStatement("SELECT * FROM product, category.Name as CatName "
+            ps = conn.prepareStatement("SELECT product.*, category.Name as CatName "
+                                        + "FROM product "
                                         + "INNER JOIN category "
-                                        + "ON category.Id = CategoryId "
-                                        + "WHERE Id = ?"
+                                        + "ON product.CategoryId = category.Id "
+                                        + "WHERE product.Id = ?"
             );
 
             ps.setInt(1, id);
