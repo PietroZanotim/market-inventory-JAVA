@@ -19,8 +19,9 @@ public class UI {
     }
 
     public static void waitEnter(Scanner sc) {
-        System.out.println("\n_________________________________");
+        System.out.println("\n=================================");
         System.out.println("Press ENTER to continue...");
+        System.out.println("=================================");
         sc.nextLine(); // Aqui ele trava e fica esperando
     }
 
@@ -41,7 +42,7 @@ public class UI {
         }
 
         boolean flag = true;
-        Product findProduct;
+        Product findProduct=null;
         do {
             System.out.println();
             System.out.printf("Text the Id from the item you do want to sell (text 0 to exit): ");
@@ -49,7 +50,7 @@ public class UI {
             if(id==0) {
                 return null;
             }
-                findProduct = list.stream().filter(p -> p.getQuantity()==id).findFirst().orElse(null);
+                findProduct = list.stream().filter(p -> p.getId()==id).findFirst().orElse(null);
                 if(findProduct==null) {
                     System.out.println("Id does not exist, try again.");
                 }
@@ -70,10 +71,10 @@ public class UI {
                 System.out.println("This quantity is not valid, try again.");
             }
         } while (quantity > findProduct.getQuantity());
+        sc.nextLine();
 
         findProduct.setQuantity(findProduct.getQuantity()-quantity);
 
-        System.out.println("Sale completed and saved in the database.");
         return findProduct;
     }
 }

@@ -79,6 +79,7 @@ public class Main {
                             prodDao.updateProduct(selledProduct);
 
                             conn.commit();
+                            System.out.println(" Sale completed and saved in the database.");
                             waitEnter(sc);
                         } catch (SQLException e) {
                             throw new RuntimeException(e);
