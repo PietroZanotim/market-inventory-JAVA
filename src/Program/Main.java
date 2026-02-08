@@ -10,6 +10,7 @@ import model.exceptions.DbException;
 import model.exceptions.InputException;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -28,6 +29,9 @@ public class Main {
         ProductDao prodDao = DaoFactory.productConnection();
         System.out.println("Sucess!");
         System.out.println();
+
+        List<Product> list = new ArrayList<>();
+        list = prodDao.findALL();
 
         boolean running = true;
 
@@ -49,8 +53,6 @@ public class Main {
                 switch (option) {
                     case 1:
                         clearScreen();
-                        List<Product> list = new ArrayList<>();
-                        list = prodDao.findALL();
                         for(Product p : list) {
                             System.out.println(p.toString());
                         }
@@ -63,6 +65,24 @@ public class Main {
                     break;
 
                     case 3:
+                        try {
+                            conn.setAutoCommit(false);
+
+                            Product selledProduct = makeSale(sc, prodDao, list);
+
+                            if(selledProduct==null) {
+                                conn.rollback();
+                                conn.setAutoCommit(true);
+                                break;
+                            }
+
+                            prodDao.updateProduct(selledProduct);
+
+                            conn.commit();
+                            waitEnter(sc);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
                     break;
 
                     case 4:
