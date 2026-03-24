@@ -53,6 +53,7 @@ public class Main {
                 switch (option) {
                     case 1:
                         clearScreen();
+                        list = prodDao.findALL();
                         for(Product p : list) {
                             System.out.println(p.toString());
                         }
@@ -82,7 +83,12 @@ public class Main {
                             System.out.println(" Sale completed and saved in the database.");
                             waitEnter(sc);
                         } catch (SQLException e) {
-                            throw new RuntimeException(e);
+                            try {
+                                conn.rollback();
+                            } catch (SQLException ex) {
+                                ex.printStackTrace();
+                            }
+                            throw new RuntimeException("Erro ao processar a venda: " + e.getMessage());
                         }
                     break;
 

@@ -50,13 +50,13 @@ public class UI {
             if(id==0) {
                 return null;
             }
-                findProduct = list.stream().filter(p -> p.getId()==id).findFirst().orElse(null);
-                if(findProduct==null) {
-                    System.out.println("Id does not exist, try again.");
-                }
-                else {
-                    flag = false;
-                }
+            findProduct = list.stream().filter(p -> p.getId()==id).findFirst().orElse(null);
+            if(findProduct==null) {
+                System.out.println("Id does not exist, try again.");
+            }
+            else {
+                flag = false;
+            }
         } while (flag);
 
         System.out.println(findProduct.toString());
