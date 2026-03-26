@@ -1,5 +1,6 @@
 package model.entities;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +9,7 @@ public class Sale {
 
     private Integer id;
     private LocalDateTime date;
-    private Double total;
+    private Double total = 0.0;
 
     private List<SaleItem> items = new ArrayList<>();
 

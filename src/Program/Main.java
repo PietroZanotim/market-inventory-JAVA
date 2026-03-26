@@ -4,8 +4,10 @@ import db.DB;
 import model.dao.CategoryDao;
 import model.dao.DaoFactory;
 import model.dao.ProductDao;
+import model.dao.SaleDao;
 import model.entities.Category;
 import model.entities.Product;
+import model.entities.Sale;
 import model.exceptions.DbException;
 import model.exceptions.InputException;
 
@@ -27,6 +29,7 @@ public class Main {
         Connection conn = DB.getConnection();
         CategoryDao catDao = DaoFactory.categoryConnection();
         ProductDao prodDao = DaoFactory.productConnection();
+        SaleDao saleDao = DaoFactory.saleConnection();
         System.out.println("Sucess!");
         System.out.println();
 
@@ -63,24 +66,27 @@ public class Main {
                     case 2:
                         Product newProduct = registerProduct(sc, catDao, prodDao);
                         prodDao.insertProduct(newProduct);
+                        list = prodDao.findALL();
                     break;
 
                     case 3:
                         try {
                             conn.setAutoCommit(false);
 
-                            Product selledProduct = makeSale(sc, prodDao, list);
+                            Sale sale = makeSale(sc, prodDao, list, saleDao);
 
-                            if(selledProduct==null) {
+                            if(sale==null) {
                                 conn.rollback();
                                 conn.setAutoCommit(true);
                                 break;
                             }
 
-                            prodDao.updateProduct(selledProduct);
+                            saleDao.insert(sale, prodDao);
 
                             conn.commit();
-                            System.out.println(" Sale completed and saved in the database.");
+
+                            System.out.println("Sale completed and saved in the database.");
+                            sc.nextLine();
                             waitEnter(sc);
                         } catch (SQLException e) {
                             try {
