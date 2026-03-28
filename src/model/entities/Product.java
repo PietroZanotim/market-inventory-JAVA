@@ -13,6 +13,10 @@ public class Product {
     public Product() {
     }
 
+    public Product(String name) {
+        this.name = name;
+    }
+
     public Product(Integer id, String name, Double price, Integer quantity, Category category) {
         this.id = id;
         this.name = name;

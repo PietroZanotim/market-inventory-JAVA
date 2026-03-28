@@ -88,7 +88,7 @@ public class Main {
                             System.out.println("Sale completed and saved in the database.");
                             sc.nextLine();
                             waitEnter(sc);
-                        } catch (SQLException e) {
+                        } catch (Exception e) {
                             try {
                                 conn.rollback();
                             } catch (SQLException ex) {

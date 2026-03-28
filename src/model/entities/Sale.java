@@ -16,10 +16,10 @@ public class Sale {
     public Sale() {
     }
 
-    public Sale(Integer id, LocalDateTime date) {
+    public Sale(Integer id, LocalDateTime date, Double total) {
         this.id = id;
         this.date = date;
-        this.total = 0.0;
+        this.total = total;
     }
 
     public void addItem(SaleItem item) {
