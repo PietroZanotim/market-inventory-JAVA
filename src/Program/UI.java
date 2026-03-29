@@ -12,6 +12,7 @@ import model.exceptions.InputException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
@@ -30,8 +31,8 @@ public class UI {
         sc.nextLine(); // Aqui ele trava e fica esperando
     }
 
-    public static Integer validateOption(int option) {
-        if(option<1 || option >4) {
+    public static Integer validateOption(int option, int limit) {
+        if(option<1 || option >limit) {
             throw new InputException("Invalid option!\n");
         }
         else {
@@ -102,5 +103,18 @@ public class UI {
 
         clearScreen();
         return sale;
+    }
+
+    public static void reportSales(List<Sale> saleList) {
+
+        DateTimeFormatter dt = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
+
+        for(Sale sl : saleList) {
+
+            for(SaleItem si : sl.getItems()) {
+                System.out.printf("Id: %d | Date: %s | Total: %.2f | ", sl.getId(), dt.format(sl.getDate()), sl.getTotal());
+                System.out.printf("Quantity: %d | UnitPrice: %.2f | ProductName: %s\n", si.getQuantity(), si.getUnitPrice(), si.getProduct().getName());
+            }
+        }
     }
 }

@@ -44,13 +44,14 @@ public class Main {
             System.out.println("1. List Products");
             System.out.println("2. Register a new product");
             System.out.println("3. Make sale");
-            System.out.println("4. Exit");
+            System.out.println("4. Reports");
+            System.out.println("5. Exit");
             System.out.println();
             System.out.print("Choose an option: ");
 
             try {
 
-                int option = validateOption(sc.nextInt());
+                int option = validateOption(sc.nextInt(), 5);
                 sc.nextLine();
 
                 switch (option) {
@@ -94,11 +95,32 @@ public class Main {
                             } catch (SQLException ex) {
                                 ex.printStackTrace();
                             }
-                            throw new RuntimeException("Erro ao processar a venda: " + e.getMessage());
+                            throw new RuntimeException("Error: " + e.getMessage());
                         }
                     break;
 
                     case 4:
+                        clearScreen();
+                        System.out.println("Select the type of report: ");
+                        System.out.println("1. All sales ");
+                        System.out.println("2. Sales by date");
+                        option = validateOption(sc.nextInt(), 2);
+
+                        switch (option) {
+                            case 1:
+                                List<Sale> saleList = saleDao.findAll();
+                                clearScreen();
+                                reportSales(saleList);
+                                sc.nextLine();
+                                waitEnter(sc);
+                            break;
+
+                            case 2:
+                            break;
+                        }
+                    break;
+
+                    case 5:
                         running = false;
                         System.out.println("Closing...");
                     break;

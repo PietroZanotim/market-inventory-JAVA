@@ -16,6 +16,11 @@ public class Sale {
     public Sale() {
     }
 
+    public Sale(Integer id, LocalDateTime date){
+        this.id = id;
+        this.date = date;
+    }
+
     public Sale(Integer id, LocalDateTime date, Double total) {
         this.id = id;
         this.date = date;
