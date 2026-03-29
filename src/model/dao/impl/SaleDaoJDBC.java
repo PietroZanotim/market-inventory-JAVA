@@ -11,11 +11,9 @@ import model.exceptions.DbException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.Date;
 
 public class SaleDaoJDBC implements SaleDao {
 
@@ -87,66 +85,88 @@ public class SaleDaoJDBC implements SaleDao {
     }
 
     @Override
-    public List<Sale> findAll() {
+    public List<Sale> findAll(Integer type, Scanner sc) {
 
         PreparedStatement ps = null;
         ResultSet rs = null;
 
-        try {
-            ps = conn.prepareStatement(
-                    "SELECT s.Id as SaleId, s.Date, s.Total, " +
-                            "si.Quantity, si.UnitPrice, p.Name as ProductName " +
-                            "FROM sale s " +
-                            "INNER JOIN sale_item si ON s.Id = si.SaleId " +
-                            "INNER JOIN product p ON si.ProductId = p.Id " +
-                            "ORDER BY s.Id" // Ordenar ajuda a manter organizado
-            );
+        if(type==0) {
 
-            rs = ps.executeQuery();
+            try {
+                ps = conn.prepareStatement(
+                        "SELECT s.Id as SaleId, s.Date, s.Total, " +
+                                "si.Quantity, si.UnitPrice, p.Name as ProductName " +
+                                "FROM sale s " +
+                                "INNER JOIN sale_item si ON s.Id = si.SaleId " +
+                                "INNER JOIN product p ON si.ProductId = p.Id " +
+                                "ORDER BY s.Id" // Ordenar ajuda a manter organizado
+                );
 
-            // O nosso "caderninho" de anotações para não duplicar vendas
-            Map<Integer, Sale> map = new HashMap<>();
+                rs = ps.executeQuery();
 
-            while (rs.next()) {
+                // O nosso "caderninho" de anotações para não duplicar vendas
+                Map<Integer, Sale> map = new HashMap<>();
 
-                // Qual é a venda dessa linha que passou na esteira?
-                int saleId = rs.getInt("SaleId");
+                while (rs.next()) {
 
-                // Tenta achar essa venda no nosso Map
-                Sale sale = map.get(saleId);
+                    // Qual é a venda dessa linha que passou na esteira?
+                    int saleId = rs.getInt("SaleId");
 
-                // Se for nulo, é a primeira vez que vemos essa Venda. Vamos instanciar!
-                if (sale == null) {
-                    java.sql.Timestamp timestamp = rs.getTimestamp("Date");
-                    LocalDateTime saleDate = timestamp.toLocalDateTime();
+                    // Tenta achar essa venda no nosso Map
+                    Sale sale = map.get(saleId);
 
-                    sale = new Sale(saleId, saleDate);
-                    sale.setTotal(rs.getDouble("Total")); // Importante puxar o total também
+                    // Se for nulo, é a primeira vez que vemos essa Venda. Vamos instanciar!
+                    if (sale == null) {
+                        java.sql.Timestamp timestamp = rs.getTimestamp("Date");
+                        LocalDateTime saleDate = timestamp.toLocalDateTime();
 
-                    // Salva no Map pra quando a próxima linha vier com o mesmo ID
-                    map.put(saleId, sale);
+                        sale = new Sale(saleId, saleDate);
+                        sale.setTotal(rs.getDouble("Total")); // Importante puxar o total também
+
+                        // Salva no Map pra quando a próxima linha vier com o mesmo ID
+                        map.put(saleId, sale);
+                    }
+
+                    // Agora, independente se a Venda acabou de ser criada ou se já existia,
+                    // nós criamos o Produto e o Item dessa linha específica:
+                    Product product = new Product();
+                    product.setName(rs.getString("ProductName"));
+
+                    SaleItem saleItem = new SaleItem(product, rs.getInt("Quantity"), rs.getDouble("UnitPrice"));
+
+                    // Pendura o item na Venda!
+                    sale.getItems().add(saleItem); // Note que usei getItems().add() em vez de addItem() para não recalcular o total que já veio do banco
                 }
 
-                // Agora, independente se a Venda acabou de ser criada ou se já existia,
-                // nós criamos o Produto e o Item dessa linha específica:
-                Product product = new Product();
-                product.setName(rs.getString("ProductName"));
+                // No final, o map.values() devolve todas as Vendas montadinhas.
+                // A gente só converte para List e retorna.
+                return new ArrayList<>(map.values());
 
-                SaleItem saleItem = new SaleItem(product, rs.getInt("Quantity"), rs.getDouble("UnitPrice"));
-
-                // Pendura o item na Venda!
-                sale.getItems().add(saleItem); // Note que usei getItems().add() em vez de addItem() para não recalcular o total que já veio do banco
+            } catch (SQLException e) {
+                throw new DbException(e.getMessage());
+            } finally {
+                DB.closeResultSet(rs); // Lembre-se de fechar o RS
+                DB.closeStatement(ps);
             }
 
-            // No final, o map.values() devolve todas as Vendas montadinhas.
-            // A gente só converte para List e retorna.
-            return new ArrayList<>(map.values());
-
-        } catch (SQLException e) {
-            throw new DbException(e.getMessage());
-        } finally {
-            DB.closeResultSet(rs); // Lembre-se de fechar o RS
-            DB.closeStatement(ps);
         }
+        else {
+
+            System.out.println();
+            LocalDateTime dateTime;
+            String stringDate;
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            System.out.print("Text the inital date to filter: ");
+            stringDate = sc.nextLine();
+
+
+            System.out.print("Text the final date to filter: ");
+
+
+            return new ArrayList<>(map.values());
+        }
+
+
     }
 }

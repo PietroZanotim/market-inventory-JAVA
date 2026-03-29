@@ -105,10 +105,10 @@ public class Main {
                         System.out.println("1. All sales ");
                         System.out.println("2. Sales by date");
                         option = validateOption(sc.nextInt(), 2);
-
+                        List<Sale> saleList = null;
                         switch (option) {
                             case 1:
-                                List<Sale> saleList = saleDao.findAll();
+                                saleList = saleDao.findAll(0, sc);
                                 clearScreen();
                                 reportSales(saleList);
                                 sc.nextLine();
@@ -116,6 +116,11 @@ public class Main {
                             break;
 
                             case 2:
+                                saleList = saleDao.findAll(1, sc);
+                                clearScreen();
+                                reportSales(saleList);
+                                sc.nextLine();
+                                waitEnter(sc);
                             break;
                         }
                     break;
