@@ -85,88 +85,109 @@ public class SaleDaoJDBC implements SaleDao {
     }
 
     @Override
-    public List<Sale> findAll(Integer type, Scanner sc) {
+    public List<Sale> findAll(Integer type, LocalDateTime initialDate, LocalDateTime finalDate) {
 
         PreparedStatement ps = null;
         ResultSet rs = null;
 
-        if(type==0) {
+        try {
 
-            try {
+            if(type==0) {
+
                 ps = conn.prepareStatement(
                         "SELECT s.Id as SaleId, s.Date, s.Total, " +
                                 "si.Quantity, si.UnitPrice, p.Name as ProductName " +
                                 "FROM sale s " +
                                 "INNER JOIN sale_item si ON s.Id = si.SaleId " +
                                 "INNER JOIN product p ON si.ProductId = p.Id " +
-                                "ORDER BY s.Id" // Ordenar ajuda a manter organizado
+                                "ORDER BY s.Id"
                 );
 
                 rs = ps.executeQuery();
 
-                // O nosso "caderninho" de anotações para não duplicar vendas
                 Map<Integer, Sale> map = new HashMap<>();
 
                 while (rs.next()) {
 
-                    // Qual é a venda dessa linha que passou na esteira?
                     int saleId = rs.getInt("SaleId");
 
-                    // Tenta achar essa venda no nosso Map
                     Sale sale = map.get(saleId);
 
-                    // Se for nulo, é a primeira vez que vemos essa Venda. Vamos instanciar!
                     if (sale == null) {
                         java.sql.Timestamp timestamp = rs.getTimestamp("Date");
                         LocalDateTime saleDate = timestamp.toLocalDateTime();
 
                         sale = new Sale(saleId, saleDate);
-                        sale.setTotal(rs.getDouble("Total")); // Importante puxar o total também
+                        sale.setTotal(rs.getDouble("Total"));
 
-                        // Salva no Map pra quando a próxima linha vier com o mesmo ID
                         map.put(saleId, sale);
                     }
 
-                    // Agora, independente se a Venda acabou de ser criada ou se já existia,
-                    // nós criamos o Produto e o Item dessa linha específica:
+
                     Product product = new Product();
                     product.setName(rs.getString("ProductName"));
 
                     SaleItem saleItem = new SaleItem(product, rs.getInt("Quantity"), rs.getDouble("UnitPrice"));
 
-                    // Pendura o item na Venda!
-                    sale.getItems().add(saleItem); // Note que usei getItems().add() em vez de addItem() para não recalcular o total que já veio do banco
+                    sale.getItems().add(saleItem);
                 }
 
-                // No final, o map.values() devolve todas as Vendas montadinhas.
-                // A gente só converte para List e retorna.
                 return new ArrayList<>(map.values());
-
-            } catch (SQLException e) {
-                throw new DbException(e.getMessage());
-            } finally {
-                DB.closeResultSet(rs); // Lembre-se de fechar o RS
-                DB.closeStatement(ps);
             }
+            else {
 
+                StringBuilder sql = new StringBuilder(
+                        "SELECT s.Id as SaleId, s.Date, s.Total, " +
+                                "si.Quantity, si.UnitPrice, p.Name as ProductName " +
+                                "FROM sale s " +
+                                "INNER JOIN sale_item si ON s.Id = si.SaleId " +
+                                "INNER JOIN product p ON si.ProductId = p.Id "
+                );
+
+                sql.append("WHERE s.Date >= ? AND s.Date <= ? ");
+                sql.append("ORDER BY s.Id");
+
+                ps = conn.prepareStatement(sql.toString());
+
+                ps.setTimestamp(1, java.sql.Timestamp.valueOf(initialDate));
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(finalDate));
+
+                rs = ps.executeQuery();
+
+                Map<Integer, Sale> map = new HashMap<>();
+
+                while (rs.next()) {
+
+                    int saleId = rs.getInt("SaleId");
+
+                    Sale sale = map.get(saleId);
+
+                    if (sale == null) {
+                        java.sql.Timestamp timestamp = rs.getTimestamp("Date");
+                        LocalDateTime saleDate = timestamp.toLocalDateTime();
+
+                        sale = new Sale(saleId, saleDate);
+                        sale.setTotal(rs.getDouble("Total"));
+
+                        map.put(saleId, sale);
+                    }
+
+
+                    Product product = new Product();
+                    product.setName(rs.getString("ProductName"));
+
+                    SaleItem saleItem = new SaleItem(product, rs.getInt("Quantity"), rs.getDouble("UnitPrice"));
+
+                    sale.getItems().add(saleItem);
+                }
+
+                return new ArrayList<>(map.values());
+            }
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeResultSet(rs);
+            DB.closeStatement(ps);
         }
-        else {
-
-            System.out.println();
-            LocalDateTime dateTime;
-            String stringDate;
-            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-            System.out.print("Text the inital date to filter: ");
-            stringDate = sc.nextLine();
-
-
-            System.out.print("Text the final date to filter: ");
-
-
-            return new ArrayList<>(map.values());
-        }
-
-
     }
 }

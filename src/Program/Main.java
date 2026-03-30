@@ -13,8 +13,12 @@ import model.exceptions.InputException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 import static Program.UI.*;
@@ -105,21 +109,21 @@ public class Main {
                         System.out.println("1. All sales ");
                         System.out.println("2. Sales by date");
                         option = validateOption(sc.nextInt(), 2);
+                        sc.nextLine();
                         List<Sale> saleList = null;
                         switch (option) {
                             case 1:
-                                saleList = saleDao.findAll(0, sc);
+                                saleList = saleDao.findAll(0, null, null);
                                 clearScreen();
                                 reportSales(saleList);
-                                sc.nextLine();
                                 waitEnter(sc);
                             break;
 
                             case 2:
-                                saleList = saleDao.findAll(1, sc);
+                                LocalDateTime[] dates  = filterDates(sc);
+                                saleList = saleDao.findAll(1, dates[0], dates[1]);
                                 clearScreen();
                                 reportSales(saleList);
-                                sc.nextLine();
                                 waitEnter(sc);
                             break;
                         }

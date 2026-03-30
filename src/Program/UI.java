@@ -107,14 +107,47 @@ public class UI {
 
     public static void reportSales(List<Sale> saleList) {
 
-        DateTimeFormatter dt = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
+        if(saleList.isEmpty()){
+            System.out.println("No sales found...");
+        }
+        else {
+            DateTimeFormatter dt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-        for(Sale sl : saleList) {
+            for(Sale sl : saleList) {
 
-            for(SaleItem si : sl.getItems()) {
-                System.out.printf("Id: %d | Date: %s | Total: %.2f | ", sl.getId(), dt.format(sl.getDate()), sl.getTotal());
-                System.out.printf("Quantity: %d | UnitPrice: %.2f | ProductName: %s\n", si.getQuantity(), si.getUnitPrice(), si.getProduct().getName());
+                for(SaleItem si : sl.getItems()) {
+                    System.out.printf("Id: %d | Date: %s | Total: %.2f | ", sl.getId(), dt.format(sl.getDate()), sl.getTotal());
+                    System.out.printf("Quantity: %d | UnitPrice: %.2f | ProductName: %s\n", si.getQuantity(), si.getUnitPrice(), si.getProduct().getName());
+                }
             }
         }
+    }
+
+    public static LocalDateTime[] filterDates(Scanner sc) {
+
+        System.out.println();
+        String stringDate;
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+        System.out.print("Type the inital date to filter(dd/mm/yyyy): ");
+        stringDate = sc.nextLine();
+        stringDate = stringDate.concat(" 00:00:00");
+
+        LocalDateTime initialDate = LocalDateTime.parse(stringDate, fmt);
+        LocalDateTime finalDate = null;
+
+        do {
+            System.out.print("Type the final date to filter(dd/mm/yyyy): ");
+            stringDate = sc.nextLine();
+            stringDate = stringDate.concat(" 23:59:59");
+
+            finalDate = LocalDateTime.parse(stringDate, fmt);
+            if (finalDate.isBefore(initialDate)) {
+                System.out.println("Error! The date isn't valid!");
+            }
+        } while (finalDate.isBefore(initialDate));
+
+        LocalDateTime[] dateList = {initialDate, finalDate};
+        return dateList;
     }
 }
